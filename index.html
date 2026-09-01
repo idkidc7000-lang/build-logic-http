@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Logic - 8-Bit Uhrzeit Sender</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            padding: 30px;
+            margin: 0;
+        }
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background: #161b22;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h1 { color: #58a6ff; margin-top: 0; font-size: 22px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .bit-display {
+            background: #0d1117;
+            padding: 20px;
+            font-size: 32px;
+            letter-spacing: 10px;
+            color: #56d364;
+            text-align: center;
+            border-radius: 6px;
+            border: 2px dashed #30363d;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        pre {
+            background: #05070a;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            color: #ff7b72;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .info { color: #8b949e; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⏰ BUILD LOGIC - 8-BIT UHRZEIT SCHALTFLÄCHE</h1>
+    
+    <p class="info">Dieses Skript rechnet deine aktuelle Computer-Minute in echtes 8-Bit-Binär um!</p>
+    
+    <div class="info">Aktuelles Live-Signal auf der 8-Bit-Arbeitsfläche:</div>
+    <div id="bit-screen" class="bit-display">00000000</div>
+
+    <p><strong>Uhrzeit als JSON-Ausgabe-Objekt (Output):</strong></p>
+    <pre id="json-screen">// Berechne Zeit...</pre>
+</div>
+
+<script>
+    function updateClockStream() {
+        const now = new Date();
+        const currentMinute = now.getMinutes(); // Holt die aktuelle Minute (0 bis 59)
+        const currentHour = now.getHours();     // Holt die aktuelle Stunde (0 bis 23)
+
+        // --- DER 8-BIT KONVERTER ---
+        // toString(2) wandelt die Zahl in Binär um. padStart(8, '0') füllt es auf genau 8 Bits auf!
+        const binMinute = currentMinute.toString(2).padStart(8, '0');
+        const binHour = currentHour.toString(2).padStart(8, '0');
+
+        // Wir nehmen die Minute für unsere primäre 8-Bit Arbeitsfläche
+        document.getElementById('bit-screen').innerText = binMinute;
+
+        // --- DAS JSON OUTPUT OBJEKT ---
+        const timeJson = {
+            "transmission_mode": "BUILD_LOGIC_8BIT",
+            "time_data": {
+                "readable_time": `${currentHour}:${currentMinute.toString().padStart(2, '0')}`,
+                "target_bus": "8-Bit-Arbeitsfläche"
+            },
+            "output_signals": {
+                "hour_8bit": binHour,
+                "minute_8bit": binMinute, // Das ist das Signal für das Spiel!
+                "bit_length": binMinute.length
+            }
+        };
+
+        // Gibt das JSON wunderschön auf dem Bildschirm aus
+        document.getElementById('json-screen').innerText = JSON.stringify(timeJson, null, 4);
+    }
+
+    // Aktualisiert die Uhrzeit jede Sekunde live auf der Webseite!
+    setInterval(updateClockStream, 1000);
+    updateClockStream(); // Direkt beim Start einmal ausführen
+</script>
+
+</body>
+</html>
+
